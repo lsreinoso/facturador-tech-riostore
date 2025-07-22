@@ -1,9 +1,13 @@
 # gui/inventory.py
+
 import customtkinter as ctk
 from tkinter import messagebox, ttk
 import ctypes
 from models import Product, db
 from gui.utils import StockForm
+from customtkinter import CTkScrollableFrame  # junto a tus otros imports de ctk
+
+
 
 SW_MAXIMIZE = 3
 def maximize_window(win):
@@ -30,7 +34,7 @@ class InventoryWindow:
         self.search_frame  = ctk.CTkFrame(self.frame)
         self.table_frame   = ctk.CTkFrame(self.frame)
         self.actions_frame = ctk.CTkFrame(self.frame)
-        self.form_frame    = ctk.CTkFrame(self.frame)  # oculto al inicio
+        self.form_frame    = CTkScrollableFrame(self.frame, corner_radius=0)  # oculto al inicio
 
         # 1) Header
         self.header_frame.pack(fill="x", pady=(10,0), padx=10)
@@ -103,10 +107,12 @@ class InventoryWindow:
         ctk.CTkButton(self.actions_frame, text="Eliminar Seleccionado",
                       command=self.delete_product)\
             .pack(side="left", padx=5)
-        ctk.CTkButton(self.actions_frame, text="Ajustar Stock",
-                      command=self.adjust_stock)\
-            .pack(side="left", padx=5)
+
+        # ---- SOLO PARA ADMINISTRADORES ----
         if self.current_user["role"] == "Administrador":
+            ctk.CTkButton(self.actions_frame, text="Ajustar Stock",
+                          command=self.adjust_stock)\
+                .pack(side="left", padx=5)
             ctk.CTkButton(self.actions_frame, text="Eliminar Categoría",
                           command=self._delete_category)\
                 .pack(side="left", padx=5)
@@ -272,8 +278,7 @@ class InventoryWindow:
                 if new_cat in cats and new_cat != old_cat:
                     return messagebox.showerror("Error","La categoría ya existe.")
                 if old_cat:
-                    db.execute("UPDATE products SET category=? WHERE category=?",
-                               (new_cat, old_cat))
+                    db.execute("UPDATE products SET category=? WHERE category=?", (new_cat, old_cat))
                 category = new_cat
             else:
                 category = d.pop("category_cb","")
@@ -287,11 +292,9 @@ class InventoryWindow:
         name = d["name"]
 
         if self.edit_id:
-            Product.update(self.edit_id, code, name, category,
-                           cost, price, type_, stock)
+            Product.update(self.edit_id, code, name, category, cost, price, type_, stock)
         else:
-            Product.create(code, name, category,
-                           cost, price, type_, stock)
+            Product.create(code, name, category, cost, price, type_, stock)
 
         # refrescar categorías y tabla
         self.cat_cb.configure(values=["Todos"]+Product.get_categories())
@@ -319,14 +322,58 @@ class InventoryWindow:
         self.load_products()
 
     def adjust_stock(self):
+        # Solo admins pueden ajustar stock
+        if self.current_user["role"] != "Administrador":
+            return messagebox.showerror("Permiso","Solo Admin puede ajustar stock.")
         sel = self.tree.selection()
         if not sel:
             return messagebox.showerror("Error","Seleccione un producto.")
         pid = self.tree.item(sel[0])["values"][0]
-        StockForm(self.master,
-                  product_id=pid,
-                  role=self.current_user["role"],
-                  callback=self.load_products)
+        p = Product.get(pid)
+
+        # Crear pop‑up integrado
+        self.popup = ctk.CTkFrame(
+            self.frame,
+            corner_radius=8,
+            fg_color="silver",
+            width=450,
+            height=360
+        )
+        self.popup.place(relx=0.5, rely=0.5, anchor="center")
+        self.popup.grab_set()  # atrapa el foco aquí
+
+        # Contenido del pop‑up
+        ctk.CTkLabel(self.popup, text="Ajustar Stock",
+                     font=("Arial", 18, "bold")).pack(pady=(15,10))
+        ctk.CTkLabel(self.popup, text=f"Producto: {p['name']}",
+                     font=("Arial", 12)).pack(pady=(0,5))
+        ctk.CTkLabel(self.popup, text=f"Stock actual: {p['stock']}",
+                     font=("Arial", 12, "bold")).pack(pady=(0,15))
+        ctk.CTkLabel(self.popup,
+                     text="Cantidad (+ ingreso, - egreso):",
+                     font=("Arial", 12, "bold")).pack(pady=(0,5))
+        self.qty_entry = ctk.CTkEntry(self.popup, width=120, height=30, font=("Arial",12))
+        self.qty_entry.pack(pady=(0,15))
+
+        btnf = ctk.CTkFrame(self.popup)
+        btnf.pack(pady=(0,15))
+        ctk.CTkButton(btnf, text="Aplicar", width=80,
+                      command=lambda: self._apply_stock(pid)).pack(side="left", padx=5)
+        ctk.CTkButton(btnf, text="Cancelar", width=80,
+                      command=self._cancel_popup).pack(side="left")
+
+    def _apply_stock(self, pid):
+        try:
+            delta = int(self.qty_entry.get())
+        except:
+            return messagebox.showerror("Error","Cantidad inválida.")
+        Product.adjust_stock(pid, delta)
+        self.load_products()
+        self._cancel_popup()
+
+    def _cancel_popup(self):
+        self.popup.grab_release()
+        self.popup.destroy()
 
     def _delete_category(self):
         cat = self.cat_var.get()
@@ -344,7 +391,7 @@ class InventoryWindow:
         for iid in self.tree.get_children():
             val = self.tree.set(iid, col).rstrip('%')
             try:
-                key = float(val) if col not in ("name","category") else val[0].lower()
+                key = float(val) if col not in ("name","category") else val.lower()
             except:
                 key = val.lower()
             data.append((key, iid))

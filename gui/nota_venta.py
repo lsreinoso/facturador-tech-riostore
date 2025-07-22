@@ -16,6 +16,8 @@ from gui.proforma import ProformaWindow
 from gui.utils import maximize_window
 from paths import get_pdf_backup_dir
 from pathlib import Path
+from customtkinter import CTkScrollableFrame
+
 
 # — DIRECTORIO DE RESPALDO CORRECTO UNIVERSAL —
 BACKUP_DIR = Path(get_pdf_backup_dir())

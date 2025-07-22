@@ -1,3 +1,5 @@
+# gui/document.py
+
 import os
 import platform
 import subprocess
@@ -9,8 +11,15 @@ from models import Document, Client, DocumentItem
 from gui.utils import maximize_window
 from paths import get_pdf_backup_dir
 
+
 # RUTA UNIVERSAL DE RESPALDO DE PDFs
 BACKUP_DIR = Path(get_pdf_backup_dir())
+
+# Lista de meses para el filtro
+MONTHS = [
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+]
 
 class DocumentWindow:
     def __init__(self, master, user):
@@ -34,6 +43,8 @@ class DocumentWindow:
         # — Filtros —
         filterf = ctk.CTkFrame(self.frame)
         filterf.pack(fill="x", pady=5, padx=20)
+
+        # Filtro por tipo
         ctk.CTkLabel(filterf, text="Tipo:").pack(side="left", padx=(0,5))
         self.tipo_cb = ctk.CTkComboBox(
             filterf,
@@ -42,9 +53,10 @@ class DocumentWindow:
             command=lambda _: self._refresh_table()
         )
         self.tipo_cb.set("Todos")
-        self.tipo_cb.pack(side="left")
+        self.tipo_cb.pack(side="left", padx=(0,15))
 
-        ctk.CTkLabel(filterf, text="Cliente:").pack(side="left", padx=(20,5))
+        # Filtro por cliente
+        ctk.CTkLabel(filterf, text="Cliente:").pack(side="left", padx=(0,5))
         self._load_clients()
         self.cliente_cb = ctk.CTkComboBox(
             filterf,
@@ -53,13 +65,22 @@ class DocumentWindow:
             command=lambda _: self._refresh_table()
         )
         self.cliente_cb.set("Todos")
-        self.cliente_cb.pack(side="left", padx=(0,5))
+        self.cliente_cb.pack(side="left", padx=(0,15))
 
-        ctk.CTkLabel(filterf, text="Buscar:").pack(side="left", padx=(20,5))
-        self.search_e = ctk.CTkEntry(filterf, width=150)
-        self.search_e.pack(side="left")
+        # --- NUEVO: filtro por mes ---
+        ctk.CTkLabel(filterf, text="Mes:").pack(side="left", padx=(0,5))
+        self.month_cb = ctk.CTkComboBox(
+            filterf,
+            values=["Todos"] + MONTHS,
+            state="readonly",
+            command=lambda _: self._refresh_table()
+        )
+        self.month_cb.set("Todos")
+        self.month_cb.pack(side="left", padx=(0,5))
+
+        # — Botón de búsqueda adicional (opcional) —
         ctk.CTkButton(filterf, text="Filtrar", command=self._refresh_table)\
-            .pack(side="left", padx=(10,0))
+            .pack(side="left", padx=(15,0))
 
         # — Tabla de documentos —
         self.tablef = ctk.CTkFrame(self.frame)
@@ -122,27 +143,34 @@ class DocumentWindow:
 
         tipo    = self.tipo_cb.get()
         cliente = self.cliente_cb.get()
-        search  = self.search_e.get().strip().lower()
+        mes_sel = self.month_cb.get()  # nombre del mes
+        search  = ""  # no hay búsqueda libre aquí
 
-        # Re-cargo documentos y clientes
+        # Re-cargo documentos
         self._load_clients()
         docs = Document.all()  # ORDER BY date DESC
 
         for d in docs:
-            # filtro tipo
+            # — filtro tipo —
             if tipo != "Todos" and d["type"] != tipo:
                 continue
-            # filtro cliente
+
+            # — filtro cliente —
             cli = Client.get(d["client_id"])
             cli_disp = f"{cli['full_name']} ({cli['cedula'] or '-'})"
             if cliente != "Todos" and cli_disp != cliente:
                 continue
-            # filtro búsqueda
-            if search:
-                if (search not in cli_disp.lower()
-                   and search not in d["type"].lower()
-                   and search not in d["date"].lower()):
+
+            # — filtro mes —
+            if mes_sel != "Todos":
+                # d["date"] viene en "DD/MM/YYYY/..." → extraigo el mes
+                try:
+                    mes_num = int(d["date"].split("/")[1])
+                except:
+                    mes_num = None
+                if mes_num is None or MONTHS[mes_num-1] != mes_sel:
                     continue
+
             # inserto, guardo id oculto
             self.tree.insert(
                 "", "end",
@@ -206,16 +234,14 @@ class DocumentWindow:
             # Borro en BD
             DocumentItem.delete_by_document(doc_id)
             Document.delete(doc_id)
-            # Borro respaldos (sin/ con padding)
+            # Borro respaldos
             for fn in (
                 BACKUP_DIR / f"{doc_ty}_{doc_id}.pdf",
                 BACKUP_DIR / f"{doc_ty}_{doc_id:06d}.pdf"
             ):
-                try:
-                    if fn.exists():
-                        fn.unlink()
-                except:
-                    pass
+                if fn.exists():
+                    try: fn.unlink()
+                    except: pass
             # Quito de la tabla
             self.tree.delete(iid)
 

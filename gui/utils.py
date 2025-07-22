@@ -31,13 +31,16 @@ def make_window_responsive(win):
 class ScrollableFrame(ctk.CTkScrollableFrame):
     """
     Frame con scroll vertical automático.
-    No hace pack() internamente; el usuario debe grid() el frame.
+    No hace pack() internamente; el usuario debe grid() o pack() el frame.
     """
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
         # Alias para compatibilidad con .scrollable_frame
         self.scrollable_frame = self
 
+# -------------------------------------------------------------------
+# ProductForm (sin cambios respecto a tu versión anterior)
+# -------------------------------------------------------------------
 class ProductForm:
     def __init__(self, master, callback, product_id=None, role="Administrador"):
         """
@@ -148,7 +151,6 @@ class ProductForm:
             .pack(side="left", padx=10)
         ctk.CTkButton(btnf, text="Cancelar", command=self.win.destroy)\
             .pack(side="left")
-        # -------------------------------------------------------------------
 
     def _on_type_change(self):
         """Oculta o muestra campos según tipo = Servicio o Producto."""
@@ -212,7 +214,9 @@ class ProductForm:
         self.callback()
         self.win.destroy()
 
-
+# -------------------------------------------------------------------
+# StockForm corregido para que no salga en blanco y aparezca todo
+# -------------------------------------------------------------------
 class StockForm:
     def __init__(self, master, product_id, role, callback):
         """
@@ -229,42 +233,44 @@ class StockForm:
         # --- Ventana ---
         self.win = ctk.CTkToplevel(master)
         self.win.title("Ajustar Stock")
-        make_window_responsive(self.win)
-        self.win.after(50, lambda: maximize_window(self.win))
-        self.win.grab_set()
+
+        # Tamaño fijo y centrado
+        self.win.geometry("350x260")
+        self.win.resizable(False, False)
+        self.win.update_idletasks()
+        w = self.win.winfo_width()
+        h = self.win.winfo_height()
+        x = master.winfo_x() + (master.winfo_width() - w)//2
+        y = master.winfo_y() + (master.winfo_height() - h)//2
+        self.win.geometry(f"+{x}+{y}")
+
+        # --- Contenedor principal ---
+        container = ctk.CTkFrame(self.win, corner_radius=0)
+        container.pack(fill="both", expand=True, padx=20, pady=20)
 
         # Obtengo datos del producto
         p = Product.get(product_id)
 
-        # --- Contenedor scrollable ---
-        scroll = ScrollableFrame(self.win)
-        container = scroll.scrollable_frame
-        container.grid_columnconfigure(0, weight=1)
+        # Etiquetas informativas centradas y en negrita
+        lbl_producto = ctk.CTkLabel(container, text="Producto:", font=("Arial", 12, "bold"))
+        lbl_producto.pack(pady=(0,5))
+        ctk.CTkLabel(container, text=p["name"], font=("Arial", 12)).pack(pady=(0,10))
 
-        row = 0
-        # Etiquetas informativas
-        ctk.CTkLabel(container, text=f"Producto: {p['name']}")\
-            .grid(row=row, column=0, sticky="w", padx=20, pady=5)
-        row += 1
-        ctk.CTkLabel(container, text=f"Stock actual: {p['stock']}")\
-            .grid(row=row, column=0, sticky="w", padx=20, pady=5)
-        row += 1
-        ctk.CTkLabel(container, text="Cantidad (+ ingreso, - egreso)")\
-            .grid(row=row, column=0, sticky="w", padx=20, pady=5)
-        row += 1
+        lbl_stock = ctk.CTkLabel(container, text=f"Stock actual: {p['stock']}", font=("Arial", 12, "bold"))
+        lbl_stock.pack(pady=(0,10))
 
-        # Entrada de cantidad
-        self.qty = ctk.CTkEntry(container)
-        self.qty.grid(row=row, column=0, sticky="ew", padx=20, pady=5)
-        row += 1
+        lbl_cant = ctk.CTkLabel(container, text="Cantidad (+ ingreso, - egreso):", font=("Arial", 12, "bold"))
+        lbl_cant.pack(pady=(0,5))
 
-        # Botones
+        # Campo de entrada visible y con tamaño adecuado
+        self.qty = ctk.CTkEntry(container, width=120, height=30, font=("Arial", 12))
+        self.qty.pack(pady=(0,15))
+
+        # Botones al pie
         btnf = ctk.CTkFrame(container)
-        btnf.grid(row=row, column=0, pady=10)
-        ctk.CTkButton(btnf, text="Aplicar", command=self.apply)\
-            .pack(side="left", padx=5)
-        ctk.CTkButton(btnf, text="Cancelar", command=self.win.destroy)\
-            .pack(side="left")
+        btnf.pack()
+        ctk.CTkButton(btnf, text="Aplicar", width=80, command=self.apply).pack(side="left", padx=5)
+        ctk.CTkButton(btnf, text="Cancelar", width=80, command=self.win.destroy).pack(side="left")
 
     def apply(self):
         """Valida, ajusta stock, refresca y cierra."""
@@ -280,4 +286,3 @@ class StockForm:
         Product.adjust_stock(self.product_id, delta)
         self.callback()
         self.win.destroy()
-# -------------------------------------------------------------------
