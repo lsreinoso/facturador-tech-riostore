@@ -1,0 +1,11 @@
+DESCARGO DE RESPONSABILIDAD
+
+El software Tech RioStore se proporciona “TAL CUAL” y “SEGÚN DISPONIBILIDAD”, sin garantía de ningún tipo, ya sea expresa o implícita. Bajo ninguna circunstancia Tech RioStore, sus afiliados, desarrolladores o licenciantes serán responsables por:
+
+1. DAÑOS DIRECTOS, INDIRECTOS, INCIDENTALES, ESPECIALES, CONSECUENCIALES O PUNITIVOS, incluyendo, pero sin limitarse a, pérdida de beneficios, interrupción del negocio, pérdida de datos o cualquier otro daño similar, incluso si se nos ha advertido de la posibilidad de tales daños.
+
+2. ERRORES O FALLAS EN EL SOFTWARE, INCLUSO SI SE PROPORCIONAN CORRECCIONES O ACTUALIZACIONES.
+
+3. USO DEL SOFTWARE EN ENTORNOS CRÍTICOS O DE ALTO RIESGO, como sistemas médicos, de transporte, financieros o de seguridad, donde una falla podría causar muerte, lesiones personales graves o daños ambientales.
+
+EL USO DEL SOFTWARE ES BAJO TU PROPIA RESPONSABILIDAD. TE RECOMENDAMOS REALIZAR COPIAS DE SEGURIDAD FRECUENTES DE TUS DATOS ANTES DE SU USO.
