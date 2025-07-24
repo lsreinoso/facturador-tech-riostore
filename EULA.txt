@@ -1,0 +1,41 @@
+ACUERDO DE LICENCIA DE USUARIO FINAL (EULA) DE TECH RIOSTORE by LUIS ENRIQUE REINOSO PEÑAFIEL
+Fecha de vigencia: 17 de julio de 2025
+
+1. PARTES  
+Este Acuerdo de Licencia de Usuario Final (“EULA”) se celebra entre tú (como usuario final) y Tech RioStore (en adelante, “Nosotros”).
+
+2. DEFINICIONES  
+2.1 “Software” se refiere a la aplicación Tech RioStore, incluyendo todos los módulos, componentes y documentación asociada.  
+2.2 “Licenciatario” se refiere a la persona o entidad que instala o usa el Software.
+
+3. CONCESIÓN DE LICENCIA  
+Nosotros te concedemos una licencia no exclusiva, intransferible y limitada para usar el Software en un solo equipo, exclusivamente para tu actividad interna.
+
+4. RESTRICCIONES  
+No podrás:  
+- Descompilar, desensamblar o realizar ingeniería inversa del Software.  
+- Redistribuir, sublicenciar, alquilar, arrendar o prestar el Software a terceros.  
+- Eliminar, modificar u ocultar avisos de copyright o marcas comerciales.
+
+5. PROPIEDAD  
+El Software es propiedad de Tech RioStore y está protegido por leyes de propiedad intelectual. No adquieres ningún derecho de propiedad sobre él.
+
+6. ACTUALIZACIONES  
+Podemos proveer actualizaciones o parches al Software. Cualquier actualización se regirá por este mismo EULA, salvo que se indique lo contrario.
+
+7. GARANTÍA LIMITADA  
+El Software se suministra “TAL CUAL”, sin garantías de ningún tipo, ya sean explícitas o implícitas. Tech RioStore no garantiza que el Software será ininterrumpido o libre de errores.
+
+8. LIMITACIÓN DE RESPONSABILIDAD  
+En ningún caso Tech RioStore será responsable por daños indirectos, consecuenciales, especiales o punitivos. Nuestra responsabilidad total con relación al Software no excederá el importe que hayas pagado por la licencia (o, en su defecto, US$ 0 si fue gratuito).
+
+9. TERMINACIÓN  
+Esta licencia termina automáticamente si incumples cualquier término de este EULA. A la terminación, debes desinstalar y destruir todas las copias del Software.
+
+10. LEY APLICABLE Y JURISDICCIÓN  
+Este EULA se regirá por las leyes de Ecuador. Cualquier controversia se resolverá ante los tribunales competentes de Guayaquil, Ecuador.
+
+11. CONTACTO  
+Tech RioStore  
+Correo: luis_enrique_reinoso@hotmai.com  
+Teléfono: +593984616768
