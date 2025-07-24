@@ -1,5 +1,0 @@
-customtkinter
-bcrypt
-cryptography
-reportlab
-pywin32
