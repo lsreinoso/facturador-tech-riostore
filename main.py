@@ -1,4 +1,26 @@
 import customtkinter as ctk
+
+# ——— Monkey‑patch para colorear botones según su texto ———
+# Guardamos la implementación original de CTkButton
+_OrigButton = ctk.CTkButton
+
+# Creamos una subclase que ajusta colores si el texto es "Guardar" o "Cancelar"
+class ColorCTkButton(_OrigButton):
+    def __init__(self, master=None, *args, text="", **kwargs):
+        if text == "Guardar":
+            # Verde estilo Bootstrap
+            kwargs.setdefault("fg_color", "#28a745")
+            kwargs.setdefault("hover_color", "#218838")
+        elif text == "Cancelar":
+            # Rojo estilo Bootstrap
+            kwargs.setdefault("fg_color", "#dc3545")
+            kwargs.setdefault("hover_color", "#c82333")
+        super().__init__(master, *args, text=text, **kwargs)
+
+# Reemplazamos CTkButton globalmente
+ctk.CTkButton = ColorCTkButton
+# —————————————————————————————————————————————————————
+
 from gui.login import LoginWindow
 
 def main():
@@ -30,3 +52,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
